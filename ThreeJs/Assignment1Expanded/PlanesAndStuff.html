@@ -3,7 +3,6 @@
    <head>
     <title>Assignment 1</title>
     <script  src="https://threejs.org/build/three.js"></script>
-    <script  src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
     <script src='https://threejs.org/examples/js/libs/dat.gui.min.js'></script>
     <script  src= "https://threejs.org/examples/js/loaders/OBJLoader.js"> </script>
     <script src= "https://threejs.org/examples/js/loaders/MTLLoader.js"> </script>
@@ -23,8 +22,11 @@
 
         let aspect = window.innerWidth / window.innerHeight;
         let camera = new THREE.PerspectiveCamera( 30, aspect, 1, 1000 );
-        camera.position.y = 5;
-        camera.position.z = 10;
+        let theta = 0;
+        let r = 20;
+        camera.position.y = 2.5;
+        camera.position.z = r*Math.cos(theta);
+        camera.position.x = r*Math.sin(theta);
         scene.add(camera);
 
         //Lights
@@ -53,11 +55,13 @@
         scene.add(plane);
 
         let render = function () {
+          requestAnimationFrame( render );
+          theta += .001;
+          camera.position.z = r*Math.cos(theta);
+          camera.position.x = r*Math.sin(theta);
+          camera.lookAt(0, 0, 0);
           renderer.render( scene, camera );
         };
-
-        let cameraControls = new THREE.OrbitControls( camera, renderer.domElement  );
-        cameraControls.addEventListener("change",render,false)
 
         // add your MTL and OBJ file loading related code.
         let material = new THREE.MTLLoader();
