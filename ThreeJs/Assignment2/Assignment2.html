@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Assignment 2</title>
+      <script  src="https://threejs.org/build/three.js"></script>
+      <script src='https://threejs.org/examples/js/libs/dat.gui.min.js'></script>
+      <script  src= "https://threejs.org/examples/js/loaders/OBJLoader.js"> </script>
+      <script src= "https://threejs.org/examples/js/loaders/MTLLoader.js"> </script>
+      <script src="https://threejs.org/examples/js/renderers/CanvasRenderer.js"></script>
+
+
+      <script>
+         // Add your own Javascript code/methods here.
+         function mainFunction()
+         {
+            let renderer = new THREE.WebGLRenderer( { antialias: true } );//let renderer = new THREE.WebGLRenderer();
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            renderer.setPixelRatio( window.devicePixelRatio );
+
+            renderer.setClearColor (0x888888, 1);
+            document.body.appendChild( renderer.domElement );
+
+            let scene = new THREE.Scene();
+
+            let aspect = window.innerWidth / window.innerHeight;
+            let camera = new THREE.PerspectiveCamera( 30, aspect, 1, 1000 );
+            let theta = 0;
+            let r = 20;
+            camera.position.y = 2.5;
+            camera.position.z = r*Math.cos(theta);
+            camera.position.x = r*Math.sin(theta);
+            scene.add(camera);
+
+            //Lights
+            let keyLight = new THREE.DirectionalLight(0xFFBF80, 1.0);
+            keyLight.position.set(-1, 0.5, 1);
+
+            let fillLight = new THREE.DirectionalLight(0x8080FF, 0.5);
+            fillLight.position.set(1, 0, 1);
+
+            let backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            backLight.position.set(1, -0.5, -1).normalize();
+            scene.add(keyLight);
+            scene.add(fillLight);
+            scene.add(backLight);
+
+            //Axis Helper
+            let axesHelper = new THREE.AxesHelper( 5 );
+            scene.add( axesHelper );
+
+            //Add floor
+            let floorTexture = new THREE.ImageUtils.loadTexture( 'GrassPack/grasstexture.jpg');
+            floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+            floorTexture.repeat.set( 10, 10 );
+            let floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+            let floorGeometry = new THREE.PlaneGeometry(15, 15, 15);
+            let floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+
+
+            //Handle Resize of window
+            let resize = function () {
+               renderer.setSize(window.innerWidth, window.innerHeight);
+               camera.aspect = window.innerWidth / window.innerHeight;
+               camera.updateProjectionMatrix();
+            };
+
+            window.addEventListener("resize",resize, false)
+
+            //render function
+            let render = function () {
+               requestAnimationFrame( render );
+
+               //slightly rotate screen on each render call
+               theta += .001;
+               camera.position.z = r*Math.cos(theta);
+               camera.position.x = r*Math.sin(theta);
+               camera.lookAt(0, 0, 0);
+
+               renderer.render( scene, camera );
+            };
+
+            render();
+         }
+      </script>
+   </head>
+   
+   <body onload="mainFunction();">
+         <h1>--Nathan Tackett 4421778--</h1>
+   </body>
+   
+</html>
