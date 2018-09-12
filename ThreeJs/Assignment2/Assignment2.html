@@ -5,6 +5,7 @@
       <script  src="https://threejs.org/build/three.js"></script>
       <script src='https://threejs.org/examples/js/libs/dat.gui.min.js'></script>
       <script  src= "https://threejs.org/examples/js/loaders/OBJLoader.js"> </script>
+      <script  src= "https://threejs.org/examples/js/loaders/FBXLoader.js"> </script>
       <script src= "https://threejs.org/examples/js/loaders/MTLLoader.js"> </script>
       <script src="https://threejs.org/examples/js/renderers/CanvasRenderer.js"></script>
 
@@ -17,7 +18,7 @@
             renderer.setSize( window.innerWidth, window.innerHeight );
             renderer.setPixelRatio( window.devicePixelRatio );
 
-            renderer.setClearColor (0x888888, 1);
+            renderer.setClearColor (0x00bfff, 1);
             document.body.appendChild( renderer.domElement );
 
             let scene = new THREE.Scene();
@@ -25,40 +26,151 @@
             let aspect = window.innerWidth / window.innerHeight;
             let camera = new THREE.PerspectiveCamera( 30, aspect, 1, 1000 );
             let theta = 0;
-            let r = 20;
-            camera.position.y = 2.5;
+            let r = 30;
+            camera.position.y = 15;
             camera.position.z = r*Math.cos(theta);
             camera.position.x = r*Math.sin(theta);
             scene.add(camera);
-
-            //Lights
-            let keyLight = new THREE.DirectionalLight(0xFFBF80, 1.0);
-            keyLight.position.set(-1, 0.5, 1);
-
-            let fillLight = new THREE.DirectionalLight(0x8080FF, 0.5);
-            fillLight.position.set(1, 0, 1);
-
-            let backLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            backLight.position.set(1, -0.5, -1).normalize();
-            scene.add(keyLight);
-            scene.add(fillLight);
-            scene.add(backLight);
-
-            //Axis Helper
-            let axesHelper = new THREE.AxesHelper( 5 );
-            scene.add( axesHelper );
+            
+            let pointLight = new THREE.PointLight( 0xFFFFFF, 1, 100 );
+            pointLight.position.set( 10, 10, 10 );
+            scene.add( pointLight );
 
             //Add floor
-            let floorTexture = new THREE.ImageUtils.loadTexture( 'GrassPack/grasstexture.jpg');
+            let floorTexture = new THREE.ImageUtils.loadTexture( 'grasstexture.jpg');
             floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
             floorTexture.repeat.set( 10, 10 );
             let floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
-            let floorGeometry = new THREE.PlaneGeometry(15, 15, 15);
+            let floorGeometry = new THREE.PlaneGeometry(100, 100, 100);
             let floor = new THREE.Mesh(floorGeometry, floorMaterial);
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
+            
+            // add your MTL and OBJ file loading related code.
+            let material = new THREE.MTLLoader();
 
+            //Create grass 1
+            material.load(
+            './Grass_01.mtl',
 
+             // called when resource is loaded
+             function ( mtl ) {
+                 // once a material is read initiate the obj loading
+                 let objLoader = new THREE.OBJLoader();
+
+                 //objLoader need material info
+                 objLoader.setMaterials(mtl);
+
+                 //Load a resource
+                 objLoader.load('./Grass_01.obj', function(object) {
+                  object.position.z += 10;
+                  scene.add(object);
+                 })
+             }
+             );
+            
+            //Create grass 2
+            material.load(
+            './Grass_02.mtl',
+
+             // called when resource is loaded
+             function ( mtl ) {
+                 // once a material is read initiate the obj loading
+                 let objLoader = new THREE.OBJLoader();
+
+                 //objLoader need material info
+                 objLoader.setMaterials(mtl);
+
+                 //Load a resource
+                 objLoader.load('./Grass_02.obj', function(object) {
+                  object.position.z -= 5;
+                  scene.add(object);
+                 })
+             }
+             );
+            
+            //Create tree
+            material.load(
+            './Tree.mtl',
+
+             // called when resource is loaded
+             function ( mtl ) {
+                 // once a material is read initiate the obj loading
+                 let objLoader = new THREE.OBJLoader();
+
+                 //objLoader need material info
+                 objLoader.setMaterials(mtl);
+
+                 //Load a resource
+                 objLoader.load('./Tree.obj', function(object) {
+                  object.position.x -= 5;
+                  object.position.z += 10;
+                  object.scale.x = 5;
+                  object.scale.y = 5;
+                  object.scale.z = 5;
+                  scene.add(object);
+                 })
+             }
+             );
+            
+            //Load chair 1
+            let loader = new THREE.OBJLoader();
+            loader.load( 
+            //resource url
+            './sun_chair.obj',
+
+            //function to  be called when resource is loaded
+            function( object ) {
+               object.scale.x = .03;
+               object.scale.y = .03;
+               object.scale.z = .03;
+               object.position.y += 1;
+               object.position.z += 4;
+
+               scene.add( object );
+               render();
+            },
+
+            //optional function to call while load is in progress
+            function ( xhr ) {
+                  console.log('loading');
+            },
+
+              //optional function to call when loading has errors
+              function ( error ) {
+                  console.log('An error happened');
+           }
+          );
+            
+            //Load chair 2
+            loader.load( 
+            //resource url
+            './sun_chair.obj',
+
+            //function to  be called when resource is loaded
+            function( object ) {
+               object.scale.x = .03;
+               object.scale.y = .03;
+               object.scale.z = .03;
+               object.position.x += 6;
+               object.position.y += 1;
+               object.position.z += 4;
+               object.lookAt(50, 0, 100);
+
+               scene.add( object );
+               render();
+            },
+
+            //optional function to call while load is in progress
+            function ( xhr ) {
+                  console.log('loading');
+            },
+
+              //optional function to call when loading has errors
+              function ( error ) {
+                  console.log('An error happened');
+           }
+          );
 
             //Handle Resize of window
             let resize = function () {
@@ -77,7 +189,7 @@
                theta += .001;
                camera.position.z = r*Math.cos(theta);
                camera.position.x = r*Math.sin(theta);
-               camera.lookAt(0, 0, 0);
+               camera.lookAt(0, 5, 0);
 
                renderer.render( scene, camera );
             };
