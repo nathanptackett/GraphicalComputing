@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Assignment 3</title>
+      <script  src="https://threejs.org/build/three.js"></script>
+      <script src="https://threejs.org/examples/js/renderers/CanvasRenderer.js"></script>
+      <script  src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
+      <script id="vertexShader" type="x-shader/x-vertex">
+         precision highp float;
+
+         attribute vec3 position;
+
+         uniform mat4 modelViewMatrix;
+         uniform mat4 projectionMatrix;
+         uniform mat3 normalMatrix;
+
+         void main()	{
+            gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0 );
+         }
+      </script>
+
+      <script id="fragmentShader" type="x-shader/x-fragment">
+         precision highp float;
+         uniform int radius;
+         uniform vec2 mousePos;
+         uniform vec2 resolution;
+
+         void main()	{
+            gl_FragColor = vec4(mousePos.x/resolution.x, mousePos.y/resolution.y, mousePos.x/mousePos.y, 1.0);
+         }
+      </script>
+
+      <script>
+         // Add your own Javascript code/methods here.
+         function mainFunction()
+         {
+            let renderer = new THREE.WebGLRenderer( { antialias: true } );//let renderer = new THREE.WebGLRenderer();
+            let xMousePos = 0;
+            let yMousePos = 0;
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            renderer.setPixelRatio( window.devicePixelRatio );
+
+            renderer.setClearColor (0xD3D3D3, 1);
+            document.body.appendChild( renderer.domElement );
+
+            let scene = new THREE.Scene();
+
+            let aspect = window.innerWidth / window.innerHeight;
+            let camera = new THREE.PerspectiveCamera( 30, aspect, 1, 1000 );
+            camera.position.z = 15;
+            scene.add(camera);
+            let cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+            
+            let light = new THREE.AmbientLight( 0xFFFFFF );
+            scene.add( light );
+
+            //Add floor
+            let boxGeometry = new THREE.BoxGeometry(5, 5, 5);
+            let material = new THREE.RawShaderMaterial({
+               side: THREE.DoubleSide,
+               fragmentShader: document.getElementById('fragmentShader').textContent,
+               vertexShader: document.getElementById('vertexShader').textContent,
+               uniforms: {
+                  radius: { type: "int", value: 1 },
+                  mousePos: { type: "vec2", value: [xMousePos, yMousePos] },
+                  resolution: { type: "vec2", value: [1920, 1080] },
+               }
+            });
+            let box = new THREE.Mesh(boxGeometry, material);
+            scene.add(box);
+            
+            //Handle Resize of window
+            let resize = function () {
+               renderer.setSize(window.innerWidth, window.innerHeight);
+               camera.aspect = window.innerWidth / window.innerHeight;
+               camera.updateProjectionMatrix();
+            };
+
+            let getCoords = function (event) {
+               xMousePos = event.x;
+               yMousePos = event.y;               
+               
+               //Recompute shader (There is probably a better way to do this)
+               material = new THREE.RawShaderMaterial({
+                  side: THREE.DoubleSide,
+                  fragmentShader: document.getElementById('fragmentShader').textContent,
+                  vertexShader: document.getElementById('vertexShader').textContent,
+                  uniforms: {
+                     radius: { type: "int", value: 1 },
+                     mousePos: { type: "vec2", value: [xMousePos, yMousePos] },
+                     resolution: { type: "vec2", value: [1920, 1080] },
+                  }
+               });
+
+            };
+
+            window.addEventListener("resize",resize, false)
+            window.addEventListener("mousemove", getCoords, false)
+
+            //render function
+            let render = function () {
+               //Give my box the newly computed material
+               box.material = material;
+
+               requestAnimationFrame( render );
+               renderer.render( scene, camera );
+            };
+
+
+            render();
+         }
+      </script>
+   </head>
+   
+   <body onload="mainFunction();">
+         <h1>--Nathan Tackett 4421778--</h1>
+   </body>
+   
+</html>
