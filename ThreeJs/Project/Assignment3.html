@@ -38,7 +38,7 @@
          function mainFunction()
          {
             let renderer = new THREE.WebGLRenderer( { antialias: true } );
-            renderer.setSize( window.innerWidth, window.innerHeight );
+            renderer.setSize( window.innerWidth*.8, window.innerHeight*.8 );
             renderer.setPixelRatio( window.devicePixelRatio );
             renderer.setClearColor (0xD3D3D3, 1);
             document.body.appendChild( renderer.domElement );
@@ -55,7 +55,7 @@
             
             //Handle Resize of window
             let resize = function () {
-               renderer.setSize(window.innerWidth, window.innerHeight);
+               renderer.setSize(window.innerWidth*.8, window.innerHeight*.8);
                camera.aspect = window.innerWidth / window.innerHeight;
                camera.updateProjectionMatrix();
             };
@@ -71,14 +71,18 @@
             render();
          }
 
-         function addPipe(x, y, z)
+         function addPipe(node1, node2)
          {
-            let pipeGeometry = new THREE.CylinderGeometry(1, 1, 5, 24);
+            let deltaX = node1.position.x - node2.position.x;
+            let deltaY = node1.position.y - node2.position.y;
+            let deltaZ = node1.position.z - node2.position.z;
+
+            let length = Math.sqrt(deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ);
+            let pipeGeometry = new THREE.CylinderGeometry(0.5, 0.5, length, 24);
             let  pipeMaterial = new THREE.MeshNormalMaterial();
             let pipe = new THREE.Mesh(pipeGeometry, pipeMaterial);
 
-            pipe.position.set(x, y, z);
-
+            pipe.position.set((node1.position.x + node2.position.x) / 2, (node1.position.y + node2.position.y) / 2, (node1.position.z + node2.position.z) / 2);
             scene.add(pipe);
             return pipe;
          }
