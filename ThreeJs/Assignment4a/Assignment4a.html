@@ -43,12 +43,12 @@
 
          void main() {
             vec4 color = texture2D(texture, vUV);
-            vec3 vector_to_light_position = vPosition.xyz - light_position;
+            vec3 vector_to_light_position = vec3( vPosition.x - light_position.x, vPosition.y - light_position.y, vPosition.z - light_position.z);
             vector_to_light_position = normalize(vector_to_light_position);
 
-            float cos_of_angle_between = clamp(dot(vNormal, vector_to_light_position), 0.0, 1.0);
+            float cos_of_angle_between = dot(vNormal, vector_to_light_position);
 
-            gl_FragColor = vec4(color.rgb*light_intensity*cos_of_angle_between, 1);
+            gl_FragColor = color*cos_of_angle_between;
          }
       </script>
 
@@ -73,7 +73,7 @@
             let cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
             
             let light_intensity = 1;
-            let light_position = [1, 1, 0.1];
+            let light_position = [1, 1, 1];
              light = new THREE.PointLight(0xFFFFFF, light_intensity, 100);
             light.position.set(light_position[0], light_position[1], light_position[2]);
             scene.add( light );
@@ -83,7 +83,7 @@
             scene.add(pointLightHelper);
 
             //Add plane
-            let planeGeometry = new THREE.PlaneGeometry(100, 100);
+            let planeGeometry = new THREE.PlaneGeometry(6, 6);
 
             let texture = new THREE.TextureLoader().load("tableTop.jpg");
 
@@ -99,6 +99,20 @@
                   texture: {type: "t", value: texture}
                }
             });
+
+            var from = new THREE.Vector3( -1, -1, 0 );
+            var to = new THREE.Vector3( light.position.x, light.position.y, light.position.z );
+            var direction = to.clone().sub(from);
+            var vec_length = direction.length();
+            var arrowHelper1 = new THREE.ArrowHelper(direction.normalize(), from, 1, 0xff0000 );
+            scene.add( arrowHelper1 );
+
+            from = new THREE.Vector3( -1, -1, 0 );
+            to = new THREE.Vector3( -1, -1, light.position.z );
+            direction = to.clone().sub(from);
+            vec_length = direction.length();
+            arrowHelper2 = new THREE.ArrowHelper(direction.normalize(), from, 1, 0xff0000 );
+            scene.add( arrowHelper2 );
 
             // let sphere = new THREE.Mesh(sphereGeometry, provided_material);
             let plane = new THREE.Mesh(planeGeometry, my_material);
