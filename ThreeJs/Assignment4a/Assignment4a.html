@@ -18,12 +18,14 @@
 
          uniform mat4 modelViewMatrix;
          uniform mat4 projectionMatrix;
+         varying vec4 vPosition;
          uniform mat3 normalMatrix;
 
          void main() {
             vUV = uv;
             vNormal = normalize(normal);
             gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0);
+            vPosition = gl_Position;
          }
       </script>
 
@@ -37,19 +39,22 @@
          uniform sampler2D texture;
          varying vec3 vNormal;
          varying vec2 vUV;
+         varying vec4 vPosition;
 
          void main() {
             vec4 color = texture2D(texture, vUV);
-            vec3 normalized_light_position = normalize(light_position);
+            vec3 vector_to_light_position = vPosition.xyz - light_position;
+            vector_to_light_position = normalize(vector_to_light_position);
 
-            float angle_between = clamp(dot(normalized_light_position, vNormal), 0.0, 1.0);
+            float cos_of_angle_between = clamp(dot(vNormal, vector_to_light_position), 0.0, 1.0);
 
-            gl_FragColor = vec4(light_intensity*color.rgb*angle_between, 1);
+            gl_FragColor = vec4(color.rgb*light_intensity*cos_of_angle_between, 1);
          }
       </script>
 
       <script>
          // Add your own Javascript code/methods here.
+         var light;
          function mainFunction()
          {
             let renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -68,21 +73,19 @@
             let cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
             
             let light_intensity = 1;
-            let light_position = [0, 5, 5];
-            let light = new THREE.PointLight(0xFFFFFF, light_intensity, 100);
+            let light_position = [1, 1, 0.1];
+             light = new THREE.PointLight(0xFFFFFF, light_intensity, 100);
             light.position.set(light_position[0], light_position[1], light_position[2]);
             scene.add( light );
 
-            let sphereSize = 1;
+            let sphereSize = 0.05;
             let pointLightHelper = new THREE.PointLightHelper(light, sphereSize);
             scene.add(pointLightHelper);
 
-            //Add sphere
-            let sphereGeometry = new THREE.SphereGeometry(3, 32, 32);
+            //Add plane
+            let planeGeometry = new THREE.PlaneGeometry(100, 100);
 
-            let provided_material = new THREE.MeshLambertMaterial({ color: 0x7777ff });
-
-            let texture = new THREE.TextureLoader().load("texture1.jpg");
+            let texture = new THREE.TextureLoader().load("tableTop.jpg");
 
             let my_material = new THREE.RawShaderMaterial({
                side: THREE.DoubleSide,
@@ -98,8 +101,8 @@
             });
 
             // let sphere = new THREE.Mesh(sphereGeometry, provided_material);
-            let sphere = new THREE.Mesh(sphereGeometry, my_material);
-            scene.add(sphere);
+            let plane = new THREE.Mesh(planeGeometry, my_material);
+            scene.add(plane);
             
             //Handle Resize of window
             let resize = function () {
