@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Assignment 5</title>
+      <script  src="https://threejs.org/build/three.js"></script>
+      <script src="https://threejs.org/examples/js/renderers/CanvasRenderer.js"></script>
+      <script  src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
+      <script id="vertexShader" type="x-shader/x-vertex">
+         precision highp float;
+
+         attribute vec3 position;
+
+         uniform mat4 modelViewMatrix;
+         uniform mat4 projectionMatrix;
+         uniform mat3 normalMatrix;
+
+         void main()	{
+            gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0 );
+         }
+      </script>
+
+      <script id="fragmentShader" type="x-shader/x-fragment">
+         precision highp float;
+         uniform int radius;
+         uniform vec2 mousePos;
+         uniform vec2 resolution;
+
+         void main()	{
+         }
+      </script>
+
+      <script>
+         // Add your own Javascript code/methods here.
+         function mainFunction()
+         {
+            //add renderer
+            let renderer = new THREE.WebGLRenderer( { antialias: true } );
+            let xMousePos = 0;
+            let yMousePos = 0;
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setClearColor (0xD3D3D3, 1);
+            document.body.appendChild( renderer.domElement );
+
+            //create scene
+            let scene = new THREE.Scene();
+
+            //create camera
+            let aspect = window.innerWidth / window.innerHeight;
+            let camera = new THREE.PerspectiveCamera( 30, aspect, 1, 1000 );
+            camera.position.z = 15;
+            scene.add(camera);
+            let cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+            
+            //add light
+            let light = new THREE.AmbientLight( 0xFFFFFF );
+            scene.add( light );
+
+            //add objects and stuff
+            let loader = new THREE.CubeTextureLoader();
+
+            loader.setPath('../CubeMap/'); 
+
+            let textureCube = loader.load([
+            'posx.jpg', 'negx.jpg',
+            'posy.jpg', 'negy.jpg',
+            'posz.jpg', 'negz.jpg',])
+
+            scene.background = textureCube;
+
+            let box_geom = new THREE.BoxGeometry(5, 5, 5);
+            let box_mat = new THREE.MeshBasicMaterial( {color: 0xFFFFFF, envMap:textureCube} );
+            let box = new THREE.Mesh(box_geom, box_mat);
+            scene.add(box);
+
+
+           //add objects and stuff
+            //Handle Resize of window
+            let resize = function () {
+               renderer.setSize(window.innerWidth, window.innerHeight);
+               camera.aspect = window.innerWidth / window.innerHeight;
+               camera.updateProjectionMatrix();
+            };
+
+            window.addEventListener("resize",resize, false);
+
+            //render function
+            let render = function () {
+               requestAnimationFrame( render );
+               renderer.render( scene, camera );
+            };
+
+
+            render();
+         }
+      </script>
+   </head>
+   
+   <body onload="mainFunction();">
+         <h1>--Nathan Tackett 4421778--</h1>
+   </body>
+   
+</html>
