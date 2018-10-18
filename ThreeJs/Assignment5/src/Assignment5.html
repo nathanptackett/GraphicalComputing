@@ -12,8 +12,9 @@
          attribute vec3 position;
          attribute vec3 normal;
    
-            uniform mat4 modelViewMatrix;
+         uniform mat4 modelViewMatrix;
          uniform mat4 projectionMatrix;
+         uniform mat4 modelMatrix;
 
          varying vec3 vNormal;
          varying vec3 CameraViewPosition;
@@ -36,8 +37,11 @@
          varying vec3 CameraViewPosition;
          varying vec3 worldViewPosition;
 
+         uniform samplerCube tex_cube;
+
          void main()	{
-            gl_FragColor = vec4(clamp(normalize(CameraViewPosition), 0.0, 1.0), 1.0);
+            vec4 reflected_color = textureCube(tex_cube, worldViewPosition);
+            gl_FragColor = reflected_color;
          }
       </script>
 
@@ -86,10 +90,12 @@
                side: THREE.DoubleSide,
                fragmentShader: document.getElementById('fragmentShader').textContent,
                vertexShader: document.getElementById('vertexShader').textContent,
+               uniforms: {
+                  tex_cube: { type: "t", value:textureCube }
+               }
             })
             let box = new THREE.Mesh(box_geom, box_mat);
             scene.add(box);
-
 
            //add objects and stuff
             //Handle Resize of window
@@ -102,7 +108,19 @@
             window.addEventListener("resize",resize, false);
 
             //render function
+            let range = 0;
+            let delta = 0;
             let render = function () {
+               if(Math.abs(box.position.x) >= range)
+                  delta *= -1;
+
+               box.position.x += delta;
+               box_mat = new THREE.RawShaderMaterial({
+                  side: THREE.DoubleSide,
+                  fragmentShader: document.getElementById('fragmentShader').textContent,
+                  vertexShader: document.getElementById('vertexShader').textContent,
+               })
+               box.material = box_mat;
                requestAnimationFrame( render );
                renderer.render( scene, camera );
             };
