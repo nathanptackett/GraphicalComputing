@@ -10,23 +10,34 @@
          precision highp float;
 
          attribute vec3 position;
-
-         uniform mat4 modelViewMatrix;
+         attribute vec3 normal;
+   
+            uniform mat4 modelViewMatrix;
          uniform mat4 projectionMatrix;
-         uniform mat3 normalMatrix;
+
+         varying vec3 vNormal;
+         varying vec3 CameraViewPosition;
+         varying vec3 worldViewPosition;
 
          void main()	{
+            vNormal = normal;
+            CameraViewPosition = position;
+
             gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0 );
+
+            worldViewPosition = gl_Position.xyz;
          }
       </script>
 
       <script id="fragmentShader" type="x-shader/x-fragment">
          precision highp float;
-         uniform int radius;
-         uniform vec2 mousePos;
-         uniform vec2 resolution;
+
+         varying vec3 vNormal;
+         varying vec3 CameraViewPosition;
+         varying vec3 worldViewPosition;
 
          void main()	{
+            gl_FragColor = vec4(clamp(normalize(CameraViewPosition), 0.0, 1.0), 1.0);
          }
       </script>
 
@@ -70,7 +81,12 @@
             scene.background = textureCube;
 
             let box_geom = new THREE.BoxGeometry(5, 5, 5);
-            let box_mat = new THREE.MeshBasicMaterial( {color: 0xFFFFFF, envMap:textureCube} );
+            // let box_mat = new THREE.MeshBasicMaterial( {color: 0xFFFFFF, envMap:textureCube} );
+            let box_mat = new THREE.RawShaderMaterial({
+               side: THREE.DoubleSide,
+               fragmentShader: document.getElementById('fragmentShader').textContent,
+               vertexShader: document.getElementById('vertexShader').textContent,
+            })
             let box = new THREE.Mesh(box_geom, box_mat);
             scene.add(box);
 
