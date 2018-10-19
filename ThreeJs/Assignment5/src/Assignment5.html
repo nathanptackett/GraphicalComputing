@@ -83,9 +83,8 @@
 
             scene.background = textureCube;
 
-            let box_geom = new THREE.SphereGeometry(2, 32, 32);
-            // let box_mat = new THREE.MeshBasicMaterial( {color: 0xFFFFFF, envMap:textureCube} );
-            let box_mat = new THREE.RawShaderMaterial({
+            let sphere_geom = new THREE.SphereGeometry(2, 32, 32);
+            let sphere_mat = new THREE.RawShaderMaterial({
                side: THREE.DoubleSide,
                fragmentShader: document.getElementById('fragmentShader').textContent,
                vertexShader: document.getElementById('vertexShader').textContent,
@@ -93,8 +92,8 @@
                   tex_cube: { type: "t", value:textureCube }
                }
             })
-            let box = new THREE.Mesh(box_geom, box_mat);
-            scene.add(box);
+            let sphere = new THREE.Mesh(sphere_geom, sphere_mat);
+            scene.add(sphere);
 
            //add objects and stuff^^^^
             //Handle Resize of window
