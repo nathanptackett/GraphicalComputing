@@ -18,15 +18,12 @@
 
          varying vec3 vNormal;
          varying vec3 CameraViewPosition;
-         varying vec3 worldViewPosition;
 
          void main()	{
             vNormal = normal;
             CameraViewPosition = position;
 
             gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0 );
-
-            worldViewPosition = gl_Position.xyz;
          }
       </script>
 
@@ -35,13 +32,17 @@
 
          varying vec3 vNormal;
          varying vec3 CameraViewPosition;
-         varying vec3 worldViewPosition;
 
          uniform samplerCube tex_cube;
          uniform vec3 cameraPosition;
+         uniform mat4 viewMatrix;
 
          void main()	{
-            vec4 reflected_color = textureCube(tex_cube, reflect(normalize(CameraViewPosition - cameraPosition), vNormal));
+            vec3 I = normalize(CameraViewPosition - cameraPosition);
+            vec3 R = reflect(I , vNormal);
+            mat3 vM = mat3(viewMatrix);
+            vec3 R_in_worldspace = vec3(dot(vM[0], R), dot(vM[1], R), dot(vM[2], R));
+            vec4 reflected_color = textureCube(tex_cube, R);
             gl_FragColor = reflected_color;
          }
       </script>
@@ -116,12 +117,12 @@
                   delta *= -1;
 
                box.position.x += delta;
-               box_mat = new THREE.RawShaderMaterial({
-                  side: THREE.DoubleSide,
-                  fragmentShader: document.getElementById('fragmentShader').textContent,
-                  vertexShader: document.getElementById('vertexShader').textContent,
-               })
-               box.material = box_mat;
+               // box_mat = new THREE.RawShaderMaterial({
+               //    side: THREE.DoubleSide,
+               //    fragmentShader: document.getElementById('fragmentShader').textContent,
+               //    vertexShader: document.getElementById('vertexShader').textContent,
+               // })
+               // box.material = box_mat;
                requestAnimationFrame( render );
                renderer.render( scene, camera );
             };
