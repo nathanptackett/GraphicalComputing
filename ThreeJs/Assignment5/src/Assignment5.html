@@ -38,9 +38,10 @@
          varying vec3 worldViewPosition;
 
          uniform samplerCube tex_cube;
+         uniform vec3 cameraPosition;
 
          void main()	{
-            vec4 reflected_color = textureCube(tex_cube, worldViewPosition);
+            vec4 reflected_color = textureCube(tex_cube, reflect(normalize(CameraViewPosition - cameraPosition), vNormal));
             gl_FragColor = reflected_color;
          }
       </script>
