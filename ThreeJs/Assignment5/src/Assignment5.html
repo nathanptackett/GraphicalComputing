@@ -14,14 +14,13 @@
    
          uniform mat4 modelViewMatrix;
          uniform mat4 projectionMatrix;
-         uniform mat4 modelMatrix;
 
          varying vec3 vNormal;
-         varying vec3 CameraViewPosition;
+         varying vec3 vPosition;
 
          void main()	{
             vNormal = normal;
-            CameraViewPosition = position;
+            vPosition = position;
 
             gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0 );
          }
@@ -31,18 +30,17 @@
          precision highp float;
 
          varying vec3 vNormal;
-         varying vec3 CameraViewPosition;
+         varying vec3 vPosition;
 
          uniform samplerCube tex_cube;
          uniform vec3 cameraPosition;
 
          void main()	{
-            vec3 I = normalize(CameraViewPosition - cameraPosition);
+            vec3 I = normalize(vPosition - cameraPosition);
             vec3 R = reflect(I , vNormal);
-            //for some reason my stuff was backwards
+            //for some reason my stuff was backwards on the x axis so I reflect it
             R.x *= -1.0;
-            vec4 reflected_color = textureCube(tex_cube, R);
-            gl_FragColor = reflected_color;
+            gl_FragColor = textureCube(tex_cube, R);
          }
       </script>
 
@@ -59,7 +57,7 @@
             renderer.setClearColor (0xD3D3D3, 1);
             document.body.appendChild( renderer.domElement );
 
-            //create scene
+            //create scene\/
             let scene = new THREE.Scene();
 
             //create camera
@@ -70,7 +68,7 @@
             let cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
             
             //add light
-            let light = new THREE.AmbientLight( 0xFFFFFF );
+            let light = new THREE.AmbientLight( );
             scene.add( light );
 
             //add objects and stuff
@@ -98,7 +96,7 @@
             let box = new THREE.Mesh(box_geom, box_mat);
             scene.add(box);
 
-           //add objects and stuff
+           //add objects and stuff^^^^
             //Handle Resize of window
             let resize = function () {
                renderer.setSize(window.innerWidth, window.innerHeight);
@@ -109,19 +107,7 @@
             window.addEventListener("resize",resize, false);
 
             //render function
-            let range = 0;
-            let delta = 0;
             let render = function () {
-               if(Math.abs(box.position.x) >= range)
-                  delta *= -1;
-
-               box.position.x += delta;
-               // box_mat = new THREE.RawShaderMaterial({
-               //    side: THREE.DoubleSide,
-               //    fragmentShader: document.getElementById('fragmentShader').textContent,
-               //    vertexShader: document.getElementById('vertexShader').textContent,
-               // })
-               // box.material = box_mat;
                requestAnimationFrame( render );
                renderer.render( scene, camera );
             };
