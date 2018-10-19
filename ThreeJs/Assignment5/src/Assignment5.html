@@ -35,13 +35,12 @@
 
          uniform samplerCube tex_cube;
          uniform vec3 cameraPosition;
-         uniform mat4 viewMatrix;
 
          void main()	{
             vec3 I = normalize(CameraViewPosition - cameraPosition);
             vec3 R = reflect(I , vNormal);
-            mat3 vM = mat3(viewMatrix);
-            vec3 R_in_worldspace = vec3(dot(vM[0], R), dot(vM[1], R), dot(vM[2], R));
+            //for some reason my stuff was backwards
+            R.x *= -1.0;
             vec4 reflected_color = textureCube(tex_cube, R);
             gl_FragColor = reflected_color;
          }
@@ -86,7 +85,7 @@
 
             scene.background = textureCube;
 
-            let box_geom = new THREE.BoxGeometry(5, 5, 5);
+            let box_geom = new THREE.SphereGeometry(2, 32, 32);
             // let box_mat = new THREE.MeshBasicMaterial( {color: 0xFFFFFF, envMap:textureCube} );
             let box_mat = new THREE.RawShaderMaterial({
                side: THREE.DoubleSide,
